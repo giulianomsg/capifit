@@ -37,12 +37,51 @@ ufw allow 'Nginx Full'
 ufw enable
 ```
 
-### 4. Criar e administrar o banco de dados MySQL
+### 4. Instalar e configurar o MySQL no Ubuntu 24.04
 
-1. No **hPanel**, vá em **Bancos de Dados** → **MySQL** → **Criar banco de dados**.
-2. Defina nome, usuário e senha; guarde as credenciais.
-3. No menu **phpMyAdmin**, abra o banco recém-criado para gerenciá-lo visualmente: é possível criar tabelas, executar consultas, importar/exportar arquivos `.sql` e editar registros sem usar linha de comando.
-4. Caso tenha scripts SQL no diretório `docs/`, importe-os via phpMyAdmin para preparar a estrutura inicial.
+1. Instale o servidor MySQL nativo do Ubuntu 24.04:
+   ```bash
+   apt install -y mysql-server
+   ```
+2. Execute o assistente de segurança para definir senha do usuário `root`, remover acessos anônimos e bloquear logins remotos:
+   ```bash
+   mysql_secure_installation
+   ```
+3. Acesse o console MySQL e crie o banco, usuário dedicado e permissões (ajuste nomes conforme desejar):
+   ```bash
+   mysql -u root -p
+   ```
+   ```sql
+   CREATE DATABASE capifit CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE USER 'capifit'@'localhost' IDENTIFIED BY 'SENHA_FORTE_AQUI';
+   GRANT ALL PRIVILEGES ON capifit.* TO 'capifit'@'localhost';
+   FLUSH PRIVILEGES;
+   ```
+4. Carregue a estrutura inicial com o script versionado `docs/capifit_schema.sql` (ele é idempotente e pode ser executado novamente sem apagar dados existentes):
+   ```bash
+   mysql -u capifit -p capifit < /var/www/capifit/docs/capifit_schema.sql
+   ```
+5. Para administração visual diretamente no VPS, instale o phpMyAdmin:
+   ```bash
+   apt install -y phpmyadmin php8.2-fpm
+   ```
+   - Durante a instalação selecione **nginx** como servidor web (se solicitado) e confirme a criação da base interna.
+   - Habilite o pool PHP-FPM no Nginx criando um bloco dedicado, por exemplo:
+     ```bash
+     cat >/etc/nginx/snippets/phpmyadmin.conf <<'NGINX'
+     location /phpmyadmin {
+         alias /usr/share/phpmyadmin;
+         index index.php index.html;
+         location ~ \.php$ {
+             include snippets/fastcgi-php.conf;
+             fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+         }
+     }
+     NGINX
+     ```
+   - Em seguida, inclua `include snippets/phpmyadmin.conf;` dentro do bloco `server` do arquivo `/etc/nginx/sites-available/capifit`, teste a configuração (`nginx -t`) e recarregue o serviço (`systemctl reload nginx`).
+   - Acesse `https://capifit.app.br/phpmyadmin`, informe as credenciais criadas anteriormente e administre o banco de dados de forma gráfica (criar tabelas, importar/exportar `.sql`, editar registros, etc.).
+6. Caso prefira manter o banco de dados gerenciado via hPanel (MySQL gerenciado da Hostinger), basta repetir os passos de criação de banco e usuário no painel e importar o mesmo script `docs/capifit_schema.sql` via phpMyAdmin do provedor.
 
 ### 5. Clonar o projeto
 
