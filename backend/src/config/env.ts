@@ -12,6 +12,8 @@ required.forEach((key) => {
 
 export const env = {
   PORT: Number(process.env.PORT) || 4000,
+  APP_URL: process.env.APP_URL || 'https://capifit.app.br',
+  FRONTEND_URL: process.env.FRONTEND_URL || 'https://capifit.app.br',
   DB_URL: process.env.DB_URL || 'mysql://user:password@localhost:3306/capifit',
   JWT_SECRET: process.env.JWT_SECRET || 'development-secret',
   JWT_EXPIRATION: process.env.JWT_EXPIRATION || '1d',

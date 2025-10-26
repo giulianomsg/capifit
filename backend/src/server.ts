@@ -4,11 +4,25 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { json, urlencoded } from 'express';
 import routes from './routes';
+import { env } from './config/env';
 
 const app = express();
 
+const allowedOrigins = [env.FRONTEND_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'];
+
 app.use(helmet());
-app.use(cors());
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true
+  })
+);
 app.use(morgan('dev'));
 app.use(json());
 app.use(urlencoded({ extended: true }));

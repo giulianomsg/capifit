@@ -4,14 +4,15 @@ Sistema completo para gestão de personal trainers e alunos, com backend Node.js
 
 ## Tutorial de Implantação em Hospedagem (Hostinger)
 
-O passo a passo abaixo descreve como publicar a plataforma completa (API, painel web e app mobile) em um VPS da Hostinger rodando Ubuntu 22.04 LTS. O fluxo pode ser adaptado para outros provedores que permitam acesso root.
+O passo a passo abaixo descreve como publicar a plataforma completa (API, painel web e app mobile) em um VPS da Hostinger rodando Ubuntu 24.04 LTS e utilizando o domínio oficial `capifit.app.br`. O fluxo pode ser adaptado para outros provedores que permitam acesso root.
 
 ### 1. Preparar o servidor
 
-1. Contrate um VPS com Ubuntu 22.04 LTS na Hostinger.
+1. Contrate um VPS com Ubuntu 24.04 LTS na Hostinger.
 2. No **hPanel**, acesse **Servidores** → **Gerenciar** e anote o IP público.
-3. Conecte-se via SSH: `ssh root@SEU_IP`. Altere a senha inicial quando solicitado.
-4. Atualize o sistema:
+3. Em **Domínios** → **Gerenciar DNS**, crie entradas **A** apontando `capifit.app.br` e `www.capifit.app.br` para o IP do VPS.
+4. Conecte-se via SSH: `ssh root@SEU_IP`. Altere a senha inicial quando solicitado.
+5. Atualize o sistema:
    ```bash
    apt update && apt upgrade -y
    ```
@@ -77,7 +78,7 @@ npm run build
 
 ```bash
 cd /var/www/capifit/backend
-pm2 start dist/server.js --name capifit-api
+pm2 start dist/index.js --name capifit-api
 pm2 save
 pm2 startup
 ```
@@ -88,10 +89,10 @@ pm2 startup
 cat >/etc/nginx/sites-available/capifit <<'EOF'
 server {
     listen 80;
-    server_name seu-dominio.com;
+    server_name capifit.app.br;
 
     location /api/ {
-        proxy_pass http://127.0.0.1:3000/;
+        proxy_pass http://127.0.0.1:4000/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -107,10 +108,12 @@ nginx -t
 systemctl reload nginx
 ```
 
+Esse bloco publica o painel web diretamente em `https://capifit.app.br` e encaminha todas as chamadas de API para `https://capifit.app.br/api`.
+
 ### 10. Configurar HTTPS
 
 ```bash
-certbot --nginx -d seu-dominio.com
+certbot --nginx -d capifit.app.br -d www.capifit.app.br
 ```
 
 Garanta que o domínio aponte para o IP do VPS antes de executar o Certbot.
@@ -122,7 +125,7 @@ Crie uma chave SSH dedicada para o servidor, adicione-a como *Deploy Key* no Git
 ### 12. Publicar o aplicativo mobile
 
 1. Gere os binários do Flutter localmente (`flutter build apk` / `flutter build ipa`).
-2. Ajuste as URLs da API no código do app antes da compilação.
+2. Ajuste as URLs da API no código do app antes da compilação, apontando para `https://capifit.app.br/api`.
 3. Publique nas lojas seguindo as diretrizes do Google Play e da Apple.
 
 ## Estrutura do Monorepo
