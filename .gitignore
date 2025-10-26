@@ -1,0 +1,33 @@
+# Node
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment
+.env
+backend/.env
+
+# Build outputs
+backend/dist
+web/dist
+
+# Flutter
+.mobile_tool
+.flutter-plugins
+.flutter-plugins-dependencies
+.dart_tool
+build/
+.dart_tool/
+.packages
+Generated.xcconfig
+*.flutter-plugins
+
+# IDEs
+.vscode
+.idea
+.DS_Store
