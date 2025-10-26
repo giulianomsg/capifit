@@ -1,41 +1,36 @@
-import express from 'express';
+// src/server.ts
+import 'dotenv/config';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import { json, urlencoded } from 'express';
-import routes from './routes';
 import { env } from './config/env';
 
 const app = express();
+app.use(express.json());
 
-const allowedOrigins = [env.FRONTEND_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'];
-
-app.use(helmet());
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error('Not allowed by CORS'));
     },
-    credentials: true
+    credentials: true,
   })
 );
-app.use(morgan('dev'));
-app.use(json());
-app.use(urlencoded({ extended: true }));
 
-app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+// exemplo de rota de healthcheck
+app.get('/health', (req: Request, res: Response) => {
+  res.json({ status: 'ok' });
 });
 
-app.use('/api', routes);
-
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+// tratador básico de erros
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err);
-  res.status(500).json({ message: 'Internal server error', details: err.message });
+  res.status(500).json({ error: err.message });
 });
 
-export default app;
+const port = process.env.PORT ? Number(process.env.PORT) : 8080;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});

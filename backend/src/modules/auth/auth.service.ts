@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import { v4 as uuid } from 'uuid';
 import { env } from '../../config/env';
 import { AuthCredentials, AuthTokenPayload, UserRole } from './auth.types';
@@ -52,7 +52,9 @@ export class AuthService {
   }
 
   private generateToken(payload: AuthTokenPayload) {
-    return jwt.sign(payload, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRATION });
+    const secret: Secret = env.JWT_SECRET;
+    const options: SignOptions = { expiresIn: env.JWT_EXPIRATION };
+    return jwt.sign(payload, secret, options);
   }
 }
 

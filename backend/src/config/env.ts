@@ -1,27 +1,16 @@
-import dotenv from 'dotenv';
+// src/config/env.ts
+import 'dotenv/config';
 
-dotenv.config();
-
-const required = ['PORT', 'JWT_SECRET'];
-
-required.forEach((key) => {
-  if (!process.env[key]) {
-    console.warn(`Environment variable ${key} is not set. Using fallback defaults when applicable.`);
+const required = (key: string, val: string | undefined) => {
+  if (!val || val.trim() === '') {
+    throw new Error(`Missing required env var: ${key}`);
   }
-});
+  return val;
+};
 
 export const env = {
-  PORT: Number(process.env.PORT) || 4000,
-  APP_URL: process.env.APP_URL || 'https://capifit.app.br',
-  FRONTEND_URL: process.env.FRONTEND_URL || 'https://capifit.app.br',
-  DB_URL: process.env.DB_URL || 'mysql://user:password@localhost:3306/capifit',
-  JWT_SECRET: process.env.JWT_SECRET || 'development-secret',
-  JWT_EXPIRATION: process.env.JWT_EXPIRATION || '1d',
-  REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION || '7d',
-  EMAIL_HOST: process.env.EMAIL_HOST || '',
-  EMAIL_PORT: Number(process.env.EMAIL_PORT) || 587,
-  EMAIL_USER: process.env.EMAIL_USER || '',
-  EMAIL_PASSWORD: process.env.EMAIL_PASSWORD || '',
-  ONESIGNAL_APP_ID: process.env.ONESIGNAL_APP_ID || '',
-  ONESIGNAL_API_KEY: process.env.ONESIGNAL_API_KEY || ''
+  NODE_ENV: process.env.NODE_ENV ?? 'development',
+  APP_KEY: required('APP_KEY', process.env.APP_KEY),
+  JWT_SECRET: required('JWT_SECRET', process.env.JWT_SECRET),
+  JWT_EXPIRATION: process.env.JWT_EXPIRATION ?? '1h'
 };
