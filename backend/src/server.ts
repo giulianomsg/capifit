@@ -26,9 +26,12 @@ app.use(
   })
 );
 
-app.get('/health', (_req: Request, res: Response) => {
+const healthHandler = (_req: Request, res: Response) => {
   res.json({ status: 'ok' });
-});
+};
+
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
