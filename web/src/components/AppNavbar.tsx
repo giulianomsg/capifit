@@ -39,8 +39,6 @@ const AppNavbar = () => {
 
     if (user.role === 'TRAINER') {
       items.push({ to: '/trainer/students', label: 'Alunos' });
-      items.push({ to: '/trainer/workouts', label: 'Treinos' });
-      items.push({ to: '/trainer/diets', label: 'Dietas' });
     }
 
     if (user.role === 'STUDENT') {

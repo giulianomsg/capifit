@@ -4,6 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../services/api';
 import type { StudentSummary } from './StudentsList';
 import { StudentForm } from './StudentForm';
+import WorkoutsTab from './student-tabs/WorkoutsTab';
+import DietsTab from './student-tabs/DietsTab';
 
 interface ApiStudentResponse {
   data?: StudentSummary;
@@ -141,10 +143,10 @@ const StudentDetails = () => {
               </div>
             </Tab>
             <Tab eventKey="workouts" title="Treinos">
-              <div className="py-4 text-center text-muted">Área de treinos será preenchida em breve.</div>
+              <WorkoutsTab studentId={student.id} />
             </Tab>
             <Tab eventKey="diets" title="Dietas">
-              <div className="py-4 text-center text-muted">Área de dietas será preenchida em breve.</div>
+              <DietsTab studentId={student.id} />
             </Tab>
             <Tab eventKey="assessments" title="Avaliações">
               <div className="py-4 text-center text-muted">Área de avaliações será preenchida em breve.</div>
