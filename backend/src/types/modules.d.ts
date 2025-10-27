@@ -9,6 +9,11 @@ declare module 'express' {
     query: Record<string, string | string[]>;
     headers: IncomingHttpHeaders & { authorization?: string };
     user?: { id: string; role: 'admin' | 'trainer' | 'student' };
+    file?: import('multer').MulterFile | null;
+    files?:
+      | Record<string, import('multer').MulterFile[]>
+      | import('multer').MulterFile[]
+      | null;
   }
 
   export interface Response {
@@ -191,11 +196,67 @@ declare module 'zod' {
 
   interface ZodUnknown extends ZodType<unknown> {}
 
+  interface ZodEnum<T extends readonly [string, ...string[]]> extends ZodType<T[number]> {}
+
   export const z: {
     string(): ZodString;
     boolean(): ZodBoolean;
     number(): ZodNumber;
     object<T extends Record<string, ZodType<any>>>(shape: T): ZodObject<T>;
     unknown(): ZodUnknown;
+    enum<T extends readonly [string, ...string[]]>(values: T, options?: { errorMap?: () => { message: string } }): ZodEnum<T>;
   };
+}
+
+declare module 'multer' {
+  import { Request, Response, NextFunction } from 'express';
+
+  export interface MulterFile {
+    fieldname: string;
+    originalname: string;
+    encoding: string;
+    mimetype: string;
+    size: number;
+    destination: string;
+    filename: string;
+    path: string;
+  }
+
+  export type FileFilterCallback = (error: Error | null, acceptFile?: boolean) => void;
+
+  export interface StorageEngine {}
+
+  export interface DiskStorageOptions {
+    destination?:
+      | string
+      | ((req: Request, file: MulterFile, callback: (error: Error | null, destination: string) => void) => void);
+    filename?: (req: Request, file: MulterFile, callback: (error: Error | null, filename: string) => void) => void;
+  }
+
+  export interface MulterOptions {
+    storage?: StorageEngine;
+    fileFilter?: (req: Request, file: MulterFile, callback: FileFilterCallback) => void;
+    limits?: {
+      fileSize?: number;
+    };
+  }
+
+  export interface MulterInstance {
+    single(fieldname: string): (req: Request, res: Response, next: NextFunction) => void;
+  }
+
+  export function diskStorage(options: DiskStorageOptions): StorageEngine;
+  export default function multer(options?: MulterOptions): MulterInstance;
+}
+
+declare module 'path' {
+  export function resolve(...paths: string[]): string;
+  export function join(...paths: string[]): string;
+  export function basename(path: string, ext?: string): string;
+  export function extname(path: string): string;
+}
+
+declare module 'fs' {
+  export function existsSync(path: string): boolean;
+  export function mkdirSync(path: string, options?: { recursive?: boolean }): void;
 }
