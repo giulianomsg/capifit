@@ -1,0 +1,162 @@
+// Prisma schema for Capifit backend
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  TRAINER
+  STUDENT
+}
+
+enum SubscriptionOwnerType {
+  TRAINER
+  STUDENT
+}
+
+enum SubscriptionPlanType {
+  MONTHLY
+  ANNUAL
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  OVERDUE
+  CANCELED
+}
+
+enum MessageFromRole {
+  TRAINER
+  STUDENT
+}
+
+enum MediaType {
+  PHOTO
+  EXAM
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  role         UserRole
+  passwordHash String
+  isActive     Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  trainer      Trainer?
+  student      Student?
+  refreshTokens RefreshToken[]
+}
+
+model Trainer {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  students  Student[]
+  messages  Message[]
+}
+
+model Student {
+  id         String      @id @default(cuid())
+  userId     String      @unique
+  trainerId  String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainer    Trainer     @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  workouts   Workout[]
+  diets      Diet[]
+  assessments Assessment[]
+  messages   Message[]
+  media      Media[]
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id         String                 @id @default(cuid())
+  ownerType  SubscriptionOwnerType
+  ownerId    String
+  planType   SubscriptionPlanType
+  status     SubscriptionStatus
+  startsAt   DateTime
+  endsAt     DateTime
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+}
+
+model Workout {
+  id         String    @id @default(cuid())
+  studentId  String
+  title      String
+  planJson   Json
+  startDate  DateTime?
+  endDate    DateTime?
+  createdAt  DateTime  @default(now())
+
+  student    Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Diet {
+  id         String    @id @default(cuid())
+  studentId  String
+  title      String
+  planJson   Json
+  calories   Int?
+  macrosJson Json?
+  createdAt  DateTime  @default(now())
+
+  student    Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Assessment {
+  id          String   @id @default(cuid())
+  studentId   String
+  metricsJson Json
+  date        DateTime
+
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id         String          @id @default(cuid())
+  trainerId  String
+  studentId  String
+  fromRole   MessageFromRole
+  content    String
+  createdAt  DateTime        @default(now())
+
+  trainer    Trainer         @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  student    Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Media {
+  id         String    @id @default(cuid())
+  studentId  String
+  type       MediaType
+  path       String
+  createdAt  DateTime  @default(now())
+
+  student    Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
