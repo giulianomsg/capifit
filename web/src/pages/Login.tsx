@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
-import { useNavigate, useLocation, Navigate, Location } from 'react-router-dom';
-import api from '../../services/api';
-import { useAuth, AuthUser } from '../../store/auth';
+import { Location, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import { AuthUser, useAuth } from '../store/auth';
 
-type LoginFormValues = {
+interface LoginFormValues {
   email: string;
   password: string;
-};
+}
 
-type LocationState = {
+interface LocationState {
   from?: Location;
-};
+}
 
 const resolveRole = (value: unknown): AuthUser['role'] | null => {
   if (typeof value !== 'string') {
@@ -27,8 +27,26 @@ const resolveRole = (value: unknown): AuthUser['role'] | null => {
   return null;
 };
 
+const buildFallbackUser = (payload: Record<string, unknown>, credentials: LoginFormValues): AuthUser => {
+  const role = resolveRole(payload?.role ?? payload?.user?.role) ?? 'STUDENT';
+
+  return {
+    id: (payload?.user as Record<string, unknown> | undefined)?.id as string | undefined ??
+      (typeof payload?.id === 'string' ? payload.id : credentials.email),
+    name: (payload?.user as Record<string, unknown> | undefined)?.name as string | undefined ??
+      (typeof payload?.name === 'string' ? payload.name : credentials.email),
+    email: (payload?.user as Record<string, unknown> | undefined)?.email as string | undefined ??
+      (typeof payload?.email === 'string' ? payload.email : credentials.email),
+    role,
+  };
+};
+
 const LoginPage = () => {
-  const { state, setSession } = useAuth();
+  const {
+    state,
+    setSession,
+    setUser,
+  } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const redirectState = (location.state as LocationState | null) ?? {};
@@ -52,30 +70,45 @@ const LoginPage = () => {
 
     try {
       const response = await api.post('/auth/login', values);
-      const payload = response.data?.data ?? response.data ?? {};
+      const payload = (response.data?.data ?? response.data ?? {}) as Record<string, unknown>;
 
-      const accessToken: string | null = payload?.accessToken ?? payload?.token ?? null;
-      const refreshToken: string | null = payload?.refreshToken ?? null;
+      const accessToken = typeof payload?.accessToken === 'string'
+        ? payload.accessToken
+        : typeof payload?.token === 'string'
+          ? payload.token
+          : null;
+      const refreshToken = typeof payload?.refreshToken === 'string' ? payload.refreshToken : null;
 
       if (!accessToken) {
         throw new Error('Access token not received');
       }
 
-      const roleFromPayload = resolveRole(payload?.role ?? payload?.user?.role);
-      const user: AuthUser = {
-        id: payload?.user?.id ?? payload?.id ?? payload?.userId ?? values.email,
-        name: payload?.user?.name ?? payload?.name ?? values.email,
-        email: payload?.user?.email ?? payload?.email ?? values.email,
-        role: roleFromPayload ?? 'STUDENT',
-      };
+      const fallbackUser = buildFallbackUser(payload, values);
+      setSession({ accessToken, refreshToken, user: fallbackUser });
 
-      setSession({ accessToken, refreshToken, user });
+      try {
+        const meResponse = await api.get('/users/me');
+        const meData = (meResponse.data?.data ?? meResponse.data ?? {}) as Record<string, unknown>;
+
+        if (typeof meData?.id === 'string' && typeof meData?.role === 'string') {
+          const resolvedRole = resolveRole(meData.role) ?? fallbackUser.role;
+          const enrichedUser: AuthUser = {
+            id: meData.id,
+            name: typeof meData?.name === 'string' ? meData.name : fallbackUser.name,
+            email: typeof meData?.email === 'string' ? meData.email : fallbackUser.email,
+            role: resolvedRole,
+          };
+          setUser(enrichedUser);
+        }
+      } catch (profileError) {
+        console.warn('Não foi possível carregar o perfil do usuário autenticado.', profileError);
+      }
 
       const redirectTo = (redirectState.from as Location | undefined)?.pathname ?? '/dashboard';
       navigate(redirectTo, { replace: true });
     } catch (error) {
       const message =
-        (error as Error).message?.includes('token')
+        (error as Error).message?.toLowerCase().includes('token')
           ? 'Não foi possível autenticar. Verifique as credenciais e tente novamente.'
           : 'Credenciais inválidas. Tente novamente.';
       setErrorMessage(message);
@@ -87,12 +120,10 @@ const LoginPage = () => {
   return (
     <Row className="justify-content-center align-items-center min-vh-100 bg-dark text-light m-0">
       <Col md={4} sm={10} className="py-5">
-        <Card bg="secondary" text="light" className="shadow-lg">
+        <Card bg="secondary" text="light" className="shadow-lg border-0">
           <Card.Body>
             <h1 className="h4 text-center mb-4">Entrar na plataforma</h1>
-            {errorMessage && (
-              <Alert variant="danger">{errorMessage}</Alert>
-            )}
+            {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
             <Form onSubmit={onSubmit} noValidate>
               <Form.Group controlId="email" className="mb-3">
                 <Form.Label>E-mail</Form.Label>
@@ -100,7 +131,13 @@ const LoginPage = () => {
                   type="email"
                   placeholder="nome@empresa.com"
                   isInvalid={Boolean(errors.email)}
-                  {...register('email', { required: 'Informe o e-mail', pattern: { value: /.+@.+\..+/, message: 'E-mail inválido' } })}
+                  {...register('email', {
+                    required: 'Informe o e-mail',
+                    pattern: {
+                      value: /.+@.+\..+/, 
+                      message: 'E-mail inválido',
+                    },
+                  })}
                 />
                 <Form.Control.Feedback type="invalid">
                   {errors.email?.message}
@@ -113,7 +150,9 @@ const LoginPage = () => {
                   type="password"
                   placeholder="Sua senha"
                   isInvalid={Boolean(errors.password)}
-                  {...register('password', { required: 'Informe a senha' })}
+                  {...register('password', {
+                    required: 'Informe a senha',
+                  })}
                 />
                 <Form.Control.Feedback type="invalid">
                   {errors.password?.message}
@@ -124,7 +163,11 @@ const LoginPage = () => {
                 <Button type="submit" variant="primary" disabled={submitting}>
                   {submitting ? <Spinner as="span" animation="border" size="sm" role="status" /> : 'Entrar'}
                 </Button>
-                <Button variant="link" className="text-light" onClick={() => navigate('/forgot')}>
+                <Button
+                  variant="link"
+                  className="text-light"
+                  onClick={() => navigate('/forgot', { replace: true })}
+                >
                   Esqueci minha senha
                 </Button>
               </div>

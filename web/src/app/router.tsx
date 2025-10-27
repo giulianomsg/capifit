@@ -6,17 +6,17 @@ import Dashboard from '../pages/Dashboard';
 import Students from '../pages/Students';
 import Workouts from '../pages/Workouts';
 
-const LoginPage = lazy(() => import('../pages/auth/Login'));
-const ForgotPasswordPage = lazy(() => import('../pages/auth/ForgotPassword'));
-const ResetPasswordPage = lazy(() => import('../pages/auth/ResetPassword'));
+const LoginPage = lazy(() => import('../pages/Login'));
+const ForgotPage = lazy(() => import('../pages/Forgot'));
+const ResetPage = lazy(() => import('../pages/Reset'));
 
 const AppRouter = () => (
   <BrowserRouter>
-    <Suspense fallback={<div className="py-5 text-center">Carregando...</div>}>
+    <Suspense fallback={<div className="py-5 text-center text-light bg-dark min-vh-100">Carregando...</div>}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/forgot" element={<ForgotPasswordPage />} />
-        <Route path="/reset" element={<ResetPasswordPage />} />
+        <Route path="/forgot" element={<ForgotPage />} />
+        <Route path="/reset" element={<ResetPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
@@ -28,10 +28,12 @@ const AppRouter = () => (
           <Route element={<RoleRoute allowedRoles={['TRAINER']} />}>
             <Route path="/trainer/students" element={<Students />} />
             <Route path="/trainer/workouts" element={<Workouts />} />
+            <Route path="/trainer/diets" element={<Workouts />} />
           </Route>
 
           <Route element={<RoleRoute allowedRoles={['STUDENT']} />}>
             <Route path="/student/workouts" element={<Workouts />} />
+            <Route path="/student/diets" element={<Workouts />} />
           </Route>
         </Route>
 

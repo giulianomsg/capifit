@@ -2,14 +2,14 @@ import { useMemo, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import api from '../../services/api';
+import api from '../services/api';
 
-type ResetFormValues = {
+interface ResetFormValues {
   password: string;
   confirmPassword: string;
-};
+}
 
-const ResetPasswordPage = () => {
+const ResetPage = () => {
   const [searchParams] = useSearchParams();
   const token = useMemo(() => searchParams.get('token'), [searchParams]);
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ const ResetPasswordPage = () => {
   return (
     <Row className="justify-content-center align-items-center min-vh-100 bg-dark text-light m-0">
       <Col md={4} sm={10} className="py-5">
-        <Card bg="secondary" text="light" className="shadow-lg">
+        <Card bg="secondary" text="light" className="shadow-lg border-0">
           <Card.Body>
             <h1 className="h4 text-center mb-4">Redefinir senha</h1>
             {feedback && <Alert variant={feedback.type}>{feedback.message}</Alert>}
@@ -96,4 +96,4 @@ const ResetPasswordPage = () => {
   );
 };
 
-export default ResetPasswordPage;
+export default ResetPage;
