@@ -3,6 +3,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import authRoutes from './modules/auth/auth.routes';
 import studentRoutes from './modules/students/student.routes';
+import workoutRoutes from './modules/workouts/workout.routes';
 import { AppError } from './errors/AppError';
 
 const app = express();
@@ -26,6 +27,7 @@ app.get('/health', (_req: Request, res: Response) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
+app.use('/api', workoutRoutes);
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof AppError) {

@@ -1,20 +1,40 @@
-// src/modules/workouts/workout.routes.ts
 import { Router, Request, Response } from 'express';
 import { authGuard } from '../../middleware/authGuard';
+import { roleGuard } from '../../middleware/roleGuard';
 import { workoutController } from './workout.controller';
 
 const router = Router();
 
-router.get('/student/:studentId', authGuard(['trainer', 'student']), (req: Request, res: Response) => {
-  return workoutController.list(req, res);
-});
+router.use(authGuard());
 
-router.post('/', authGuard(['trainer']), (req: Request, res: Response) => {
-  return workoutController.create(req, res);
-});
+router.get(
+  '/students/:studentId/workouts',
+  roleGuard(['admin', 'trainer', 'student']),
+  (req: Request, res: Response) => workoutController.list(req, res),
+);
 
-router.put('/:id', authGuard(['trainer']), (req: Request, res: Response) => {
-  return workoutController.update(req, res);
-});
+router.post(
+  '/students/:studentId/workouts',
+  roleGuard(['trainer']),
+  (req: Request, res: Response) => workoutController.create(req, res),
+);
+
+router.get(
+  '/workouts/:id',
+  roleGuard(['admin', 'trainer', 'student']),
+  (req: Request, res: Response) => workoutController.show(req, res),
+);
+
+router.patch(
+  '/workouts/:id',
+  roleGuard(['trainer']),
+  (req: Request, res: Response) => workoutController.update(req, res),
+);
+
+router.delete(
+  '/workouts/:id',
+  roleGuard(['trainer']),
+  (req: Request, res: Response) => workoutController.remove(req, res),
+);
 
 export default router;

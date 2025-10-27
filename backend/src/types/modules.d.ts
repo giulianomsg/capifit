@@ -139,6 +139,13 @@ declare module '@prisma/client' {
     user: any;
     student: any;
     trainer: any;
+    refreshToken: any;
+    workout: any;
+    diet: any;
+    assessment: any;
+    subscription: any;
+    message: any;
+    media: any;
     $transaction<T>(callback: (tx: PrismaClient) => Promise<T>): Promise<T>;
   }
 
@@ -167,15 +174,19 @@ declare module 'zod' {
   interface ZodString extends ZodType<string> {
     min(value: number, message?: string): ZodString;
     email(message?: string): ZodString;
+    datetime(options?: { message?: string }): ZodString;
   }
 
   interface ZodBoolean extends ZodType<boolean> {}
 
   interface ZodObject<T extends Record<string, ZodType<any>>> extends ZodType<{ [K in keyof T]: Infer<T[K]> }> {}
 
+  interface ZodUnknown extends ZodType<unknown> {}
+
   export const z: {
     string(): ZodString;
     boolean(): ZodBoolean;
     object<T extends Record<string, ZodType<any>>>(shape: T): ZodObject<T>;
+    unknown(): ZodUnknown;
   };
 }
