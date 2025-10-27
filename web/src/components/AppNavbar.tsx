@@ -44,6 +44,7 @@ const AppNavbar = () => {
     }
 
     if (user.role === 'STUDENT') {
+      items.push({ to: '/student/profile', label: 'Meu perfil' });
       items.push({ to: '/student/workouts', label: 'Meus treinos' });
       items.push({ to: '/student/diets', label: 'Minha dieta' });
     }

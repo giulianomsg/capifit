@@ -3,12 +3,15 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from '../components/ProtectedRoute';
 import RoleRoute from '../components/RoleRoute';
 import Dashboard from '../pages/Dashboard';
-import Students from '../pages/Students';
 import Workouts from '../pages/Workouts';
 
 const LoginPage = lazy(() => import('../pages/Login'));
 const ForgotPage = lazy(() => import('../pages/Forgot'));
 const ResetPage = lazy(() => import('../pages/Reset'));
+const TrainerStudentsListPage = lazy(() => import('../pages/trainer/StudentsList'));
+const TrainerStudentFormPage = lazy(() => import('../pages/trainer/StudentForm'));
+const TrainerStudentDetailsPage = lazy(() => import('../pages/trainer/StudentDetails'));
+const StudentProfilePage = lazy(() => import('../pages/student/MyProfile'));
 
 const AppRouter = () => (
   <BrowserRouter>
@@ -26,12 +29,15 @@ const AppRouter = () => (
           </Route>
 
           <Route element={<RoleRoute allowedRoles={['TRAINER']} />}>
-            <Route path="/trainer/students" element={<Students />} />
+            <Route path="/trainer/students" element={<TrainerStudentsListPage />} />
+            <Route path="/trainer/students/new" element={<TrainerStudentFormPage />} />
+            <Route path="/trainer/students/:studentId" element={<TrainerStudentDetailsPage />} />
             <Route path="/trainer/workouts" element={<Workouts />} />
             <Route path="/trainer/diets" element={<Workouts />} />
           </Route>
 
           <Route element={<RoleRoute allowedRoles={['STUDENT']} />}>
+            <Route path="/student/profile" element={<StudentProfilePage />} />
             <Route path="/student/workouts" element={<Workouts />} />
             <Route path="/student/diets" element={<Workouts />} />
           </Route>
