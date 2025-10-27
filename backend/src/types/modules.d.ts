@@ -179,6 +179,11 @@ declare module 'zod' {
 
   interface ZodBoolean extends ZodType<boolean> {}
 
+  interface ZodNumber extends ZodType<number> {
+    int(message?: string): ZodNumber;
+    nonnegative(message?: string): ZodNumber;
+  }
+
   interface ZodObject<T extends Record<string, ZodType<any>>> extends ZodType<{ [K in keyof T]: Infer<T[K]> }> {}
 
   interface ZodUnknown extends ZodType<unknown> {}
@@ -186,6 +191,7 @@ declare module 'zod' {
   export const z: {
     string(): ZodString;
     boolean(): ZodBoolean;
+    number(): ZodNumber;
     object<T extends Record<string, ZodType<any>>>(shape: T): ZodObject<T>;
     unknown(): ZodUnknown;
   };

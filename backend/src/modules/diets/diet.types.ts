@@ -1,26 +1,50 @@
-export interface DietMealItem {
-  food: string;
-  quantity: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fats: number;
-  notes?: string;
-}
+import { z } from 'zod';
 
-export interface DietMeal {
-  time: string;
+const jsonSchema = z
+  .unknown()
+  .refine(
+    (value) => typeof value === 'object' && value !== null,
+    { message: 'planJson must be an object or array' },
+  );
+
+export const createDietSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  planJson: jsonSchema,
+  calories: z.number().int('calories must be an integer').nonnegative('calories cannot be negative').optional(),
+  macrosJson: jsonSchema.optional(),
+});
+
+export const updateDietSchema = z
+  .object({
+    title: z.string().min(1, 'Title is required').optional(),
+    planJson: jsonSchema.optional(),
+    calories: z.number().int('calories must be an integer').nonnegative('calories cannot be negative').optional(),
+    macrosJson: jsonSchema.optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, {
+    message: 'At least one field must be provided',
+  });
+
+export interface CreateDietInput {
   title: string;
-  items: DietMealItem[];
+  planJson: unknown;
+  calories?: number;
+  macrosJson?: unknown;
 }
 
-export interface DietPlan {
+export interface UpdateDietInput {
+  title?: string;
+  planJson?: unknown;
+  calories?: number;
+  macrosJson?: unknown;
+}
+
+export interface DietResponse {
   id: string;
-  trainerId: string;
   studentId: string;
   title: string;
-  totalCalories: number;
-  meals: DietMeal[];
+  planJson: unknown;
+  calories: number | null;
+  macrosJson: unknown | null;
   createdAt: string;
-  updatedAt: string;
 }
