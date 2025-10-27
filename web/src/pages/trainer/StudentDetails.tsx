@@ -8,6 +8,7 @@ import WorkoutsTab from './student-tabs/WorkoutsTab';
 import DietsTab from './student-tabs/DietsTab';
 import AssessmentsTab from './student-tabs/AssessmentsTab';
 import MediaTab from './student-tabs/MediaTab';
+import MessagesTab from './student-tabs/MessagesTab';
 
 interface ApiStudentResponse {
   data?: StudentSummary;
@@ -111,9 +112,7 @@ const StudentDetails = () => {
   }
 
   if (!student) {
-    return (
-      <Alert variant="warning">Aluno não encontrado.</Alert>
-    );
+    return <Alert variant="warning">Aluno não encontrado.</Alert>;
   }
 
   return (
@@ -157,7 +156,9 @@ const StudentDetails = () => {
               <MediaTab studentId={student.id} />
             </Tab>
             <Tab eventKey="messages" title="Mensagens">
-              <div className="py-4 text-center text-muted">Histórico de mensagens será preenchido em breve.</div>
+              <div className="mt-3">
+                <MessagesTab studentId={student.id} />
+              </div>
             </Tab>
           </Tabs>
         </Col>

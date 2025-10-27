@@ -47,6 +47,7 @@ const AppNavbar = () => {
       items.push({ to: '/student/diets', label: 'Minha dieta' });
       items.push({ to: '/student/assessments', label: 'Minhas avaliações' });
       items.push({ to: '/student/media', label: 'Minhas mídias' });
+      items.push({ to: '/student/messages', label: 'Minhas mensagens' });
     }
 
     return items;

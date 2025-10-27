@@ -15,6 +15,7 @@ const StudentWorkoutsPage = lazy(() => import('../pages/student/MyWorkouts'));
 const StudentDietsPage = lazy(() => import('../pages/student/MyDiets'));
 const StudentAssessmentsPage = lazy(() => import('../pages/student/MyAssessments'));
 const StudentMediaPage = lazy(() => import('../pages/student/MyMedia'));
+const StudentMessagesPage = lazy(() => import('../pages/student/MyMessages'));
 
 const AppRouter = () => (
   <BrowserRouter>
@@ -43,6 +44,7 @@ const AppRouter = () => (
             <Route path="/student/diets" element={<StudentDietsPage />} />
             <Route path="/student/assessments" element={<StudentAssessmentsPage />} />
             <Route path="/student/media" element={<StudentMediaPage />} />
+            <Route path="/student/messages" element={<StudentMessagesPage />} />
           </Route>
         </Route>
 
