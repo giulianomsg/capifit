@@ -182,6 +182,9 @@ declare module 'zod' {
   interface ZodNumber extends ZodType<number> {
     int(message?: string): ZodNumber;
     nonnegative(message?: string): ZodNumber;
+    positive(message?: string): ZodNumber;
+    min(value: number, message?: string): ZodNumber;
+    max(value: number, message?: string): ZodNumber;
   }
 
   interface ZodObject<T extends Record<string, ZodType<any>>> extends ZodType<{ [K in keyof T]: Infer<T[K]> }> {}
