@@ -4,11 +4,11 @@ import { env } from '../config/env';
 
 declare module 'express-serve-static-core' {
   interface Request {
-    user?: { id: string; role: string };
+    user?: { id: string; role: 'admin' | 'trainer' | 'student' };
   }
 }
 
-export function authGuard(requiredRoles: string[] = []) {
+export function authGuard(requiredRoles: Array<'admin' | 'trainer' | 'student'> = []) {
   return (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -18,7 +18,10 @@ export function authGuard(requiredRoles: string[] = []) {
     const token = authHeader.replace('Bearer ', '');
 
     try {
-      const payload = jwt.verify(token, env.JWT_SECRET) as { id: string; role: string };
+      const payload = jwt.verify(token, env.JWT_SECRET) as {
+        id: string;
+        role: 'admin' | 'trainer' | 'student';
+      };
       req.user = payload;
 
       if (requiredRoles.length && !requiredRoles.includes(payload.role)) {

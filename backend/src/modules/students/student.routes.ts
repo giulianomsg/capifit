@@ -1,20 +1,16 @@
-// src/modules/students/student.routes.ts
-import { Router, Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
 import { authGuard } from '../../middleware/authGuard';
+import { roleGuard } from '../../middleware/roleGuard';
 import { studentController } from './student.controller';
 
 const router = Router();
 
-router.get('/trainer/:trainerId', authGuard(['trainer']), (req: Request, res: Response) => {
-  return studentController.listByTrainer(req, res);
-});
+router.use(authGuard());
 
-router.post('/', authGuard(['trainer']), (req: Request, res: Response) => {
-  return studentController.create(req, res);
-});
-
-router.put('/:id', authGuard(['trainer']), (req: Request, res: Response) => {
-  return studentController.update(req, res);
-});
+router.get('/', roleGuard(['admin', 'trainer']), (req: Request, res: Response) => studentController.list(req, res));
+router.post('/', roleGuard(['trainer']), (req: Request, res: Response) => studentController.create(req, res));
+router.get('/:id', roleGuard(['admin', 'trainer', 'student']), (req: Request, res: Response) => studentController.show(req, res));
+router.patch('/:id', roleGuard(['admin', 'trainer', 'student']), (req: Request, res: Response) => studentController.update(req, res));
+router.delete('/:id', roleGuard(['admin', 'trainer']), (req: Request, res: Response) => studentController.remove(req, res));
 
 export default router;

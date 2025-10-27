@@ -1,8 +1,9 @@
-// src/server.ts
 import 'dotenv/config';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
-import { env } from './config/env';
+import authRoutes from './modules/auth/auth.routes';
+import studentRoutes from './modules/students/student.routes';
+import { AppError } from './errors/AppError';
 
 const app = express();
 app.use(express.json());
@@ -19,15 +20,20 @@ app.use(
   })
 );
 
-// exemplo de rota de healthcheck
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok' });
 });
 
-// tratador básico de erros
+app.use('/api/auth', authRoutes);
+app.use('/api/students', studentRoutes);
+
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({ message: err.message });
+  }
+
   console.error(err);
-  res.status(500).json({ error: err.message });
+  return res.status(500).json({ error: err.message });
 });
 
 const port = process.env.PORT ? Number(process.env.PORT) : 8080;

@@ -8,7 +8,7 @@ declare module 'express' {
     params: Record<string, string>;
     query: Record<string, string | string[]>;
     headers: IncomingHttpHeaders & { authorization?: string };
-    user?: { id: string; role: string };
+    user?: { id: string; role: 'admin' | 'trainer' | 'student' };
   }
 
   export interface Response {
@@ -24,6 +24,7 @@ declare module 'express' {
     get(path: string, ...handlers: any[]): Router;
     post(path: string, ...handlers: any[]): Router;
     put(path: string, ...handlers: any[]): Router;
+    patch(path: string, ...handlers: any[]): Router;
     delete(path: string, ...handlers: any[]): Router;
   }
 
@@ -47,7 +48,7 @@ declare module 'express' {
 
 declare module 'express-serve-static-core' {
   interface Request {
-    user?: { id: string; role: string };
+    user?: { id: string; role: 'admin' | 'trainer' | 'student' };
   }
 }
 
@@ -126,3 +127,55 @@ declare module 'dotenv' {
 }
 
 declare module 'dotenv/config';
+
+declare module '@prisma/client' {
+  export enum UserRole {
+    ADMIN = 'ADMIN',
+    TRAINER = 'TRAINER',
+    STUDENT = 'STUDENT',
+  }
+
+  export class PrismaClient {
+    user: any;
+    student: any;
+    trainer: any;
+    $transaction<T>(callback: (tx: PrismaClient) => Promise<T>): Promise<T>;
+  }
+
+  export namespace Prisma {
+    export type StudentInclude = any;
+    export type StudentDefaultArgs = any;
+    export type StudentGetPayload<T> = any;
+    export type UserUpdateInput = Record<string, any>;
+    export class PrismaClientKnownRequestError extends Error {
+      code: string;
+      constructor(message: string, options?: { code: string });
+    }
+  }
+}
+
+declare module 'zod' {
+  type Infer<T> = T extends { _output: infer O } ? O : never;
+
+  interface ZodType<T> {
+    _output: T;
+    safeParse(data: unknown): { success: true; data: T } | { success: false; error: { flatten(): any } };
+    optional(): ZodType<T | undefined>;
+    refine(check: (value: T) => boolean, params?: { message?: string }): ZodType<T>;
+  }
+
+  interface ZodString extends ZodType<string> {
+    min(value: number, message?: string): ZodString;
+    email(message?: string): ZodString;
+  }
+
+  interface ZodBoolean extends ZodType<boolean> {}
+
+  interface ZodObject<T extends Record<string, ZodType<any>>> extends ZodType<{ [K in keyof T]: Infer<T[K]> }> {}
+
+  export const z: {
+    string(): ZodString;
+    boolean(): ZodBoolean;
+    object<T extends Record<string, ZodType<any>>>(shape: T): ZodObject<T>;
+  };
+}
