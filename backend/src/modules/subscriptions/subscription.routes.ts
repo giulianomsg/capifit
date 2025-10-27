@@ -1,24 +1,40 @@
-// src/modules/subscriptions/subscription.routes.ts
 import { Router, Request, Response } from 'express';
 import { authGuard } from '../../middleware/authGuard';
+import { roleGuard } from '../../middleware/roleGuard';
 import { subscriptionController } from './subscription.controller';
 
 const router = Router();
 
-router.get('/plans', authGuard(['admin']), (req: Request, res: Response) => {
-  return subscriptionController.listPlans(req, res);
-});
+router.use(authGuard());
 
-router.post('/plans', authGuard(['admin']), (req: Request, res: Response) => {
-  return subscriptionController.createPlan(req, res);
-});
+router.get(
+  '/subscriptions',
+  roleGuard(['admin', 'trainer', 'student']),
+  (req: Request, res: Response) => subscriptionController.list(req, res),
+);
 
-router.get('/trainer/:trainerId', authGuard(['trainer']), (req: Request, res: Response) => {
-  return subscriptionController.listContracts(req, res);
-});
+router.post(
+  '/subscriptions',
+  roleGuard(['admin', 'trainer']),
+  (req: Request, res: Response) => subscriptionController.create(req, res),
+);
 
-router.post('/contracts', authGuard(['trainer']), (req: Request, res: Response) => {
-  return subscriptionController.createContract(req, res);
-});
+router.get(
+  '/subscriptions/:id',
+  roleGuard(['admin', 'trainer', 'student']),
+  (req: Request, res: Response) => subscriptionController.show(req, res),
+);
+
+router.patch(
+  '/subscriptions/:id',
+  roleGuard(['admin', 'trainer', 'student']),
+  (req: Request, res: Response) => subscriptionController.update(req, res),
+);
+
+router.delete(
+  '/subscriptions/:id',
+  roleGuard(['admin', 'trainer']),
+  (req: Request, res: Response) => subscriptionController.remove(req, res),
+);
 
 export default router;
