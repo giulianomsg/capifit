@@ -1,0 +1,15 @@
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
