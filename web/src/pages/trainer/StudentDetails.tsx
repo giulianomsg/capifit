@@ -6,6 +6,8 @@ import type { StudentSummary } from './StudentsList';
 import { StudentForm } from './StudentForm';
 import WorkoutsTab from './student-tabs/WorkoutsTab';
 import DietsTab from './student-tabs/DietsTab';
+import AssessmentsTab from './student-tabs/AssessmentsTab';
+import MediaTab from './student-tabs/MediaTab';
 
 interface ApiStudentResponse {
   data?: StudentSummary;
@@ -149,10 +151,10 @@ const StudentDetails = () => {
               <DietsTab studentId={student.id} />
             </Tab>
             <Tab eventKey="assessments" title="Avaliações">
-              <div className="py-4 text-center text-muted">Área de avaliações será preenchida em breve.</div>
+              <AssessmentsTab studentId={student.id} />
             </Tab>
             <Tab eventKey="media" title="Fotos & Exames">
-              <div className="py-4 text-center text-muted">Área de mídia será preenchida em breve.</div>
+              <MediaTab studentId={student.id} />
             </Tab>
             <Tab eventKey="messages" title="Mensagens">
               <div className="py-4 text-center text-muted">Histórico de mensagens será preenchido em breve.</div>
