@@ -6,6 +6,7 @@ import studentRoutes from './modules/students/student.routes';
 import workoutRoutes from './modules/workouts/workout.routes';
 import dietRoutes from './modules/diets/diet.routes';
 import assessmentRoutes from './modules/assessments/assessment.routes';
+import messageRoutes from './modules/messages/message.routes';
 import { AppError } from './errors/AppError';
 
 const app = express();
@@ -32,6 +33,7 @@ app.use('/api/students', studentRoutes);
 app.use('/api', workoutRoutes);
 app.use('/api', dietRoutes);
 app.use('/api', assessmentRoutes);
+app.use('/api', messageRoutes);
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof AppError) {
